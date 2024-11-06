@@ -1,7 +1,7 @@
 //! Abstractions for confidence intervals.
 //!
 //! ```
-//! use confidence::ConfidenceLevel;
+//! use confi::ConfidenceLevel;
 //!
 //! let from_fraction = ConfidenceLevel::fractional(0.1).unwrap();
 //! let from_percentage = ConfidenceLevel::percentage(10.0).unwrap();

@@ -6,7 +6,7 @@
 //! zero stimulus (the minimum detectable value).
 //!
 //! ```rust
-//! use confidence::SignificanceLevel;
+//! use confi::SignificanceLevel;
 //!
 //! let from_fraction = SignificanceLevel::fractional(0.1).unwrap();
 //! let from_percentage = SignificanceLevel::percentage(10.0).unwrap();

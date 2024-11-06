@@ -1,11 +1,11 @@
 [package]
-name = "confidence"
+name = "confi"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 authors = ["Christopher Gubbin <chris.gubbin@gmail.com>"]
 description = "confidence intervals and significance levels for statistical computation"
-repository = "https://github.com/cgubbin/confidence"
+repository = "https://github.com/cgubbin/confi"
 
 [dependencies]
 ndarray = "0.16.1"
