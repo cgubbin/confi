@@ -1,5 +1,14 @@
 //! A [`ConfidenceInterval`] describes the range of a values a quantity can take, expressed to a
 //! given [`ConfidenceLevel`]
+//! ```
+//! use confidence::{ConfidenceLevel, ConfidenceInterval, Confidence};
+//!
+//! let from_fraction = ConfidenceLevel::fractional(0.1).unwrap();
+//! let interval = ConfidenceInterval::new(1.0..=3.0, from_fraction);
+//!
+//! assert!(interval.contains(2.0));
+//!
+//! ```
 
 use crate::ConfidenceLevel;
 use num_traits::{Float, FromPrimitive, ToPrimitive};

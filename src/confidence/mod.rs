@@ -1,5 +1,14 @@
-/// Abstractions for confidence intervals.
-///
+//! Abstractions for confidence intervals.
+//!
+//! ```
+//! use confidence::ConfidenceLevel;
+//!
+//! let from_fraction = ConfidenceLevel::fractional(0.1).unwrap();
+//! let from_percentage = ConfidenceLevel::percentage(10.0).unwrap();
+//!
+//! assert_eq!(from_fraction, from_percentage);
+//! ```
+
 /// A confidence interval represents the range of values a measurand is expected to fall in,
 /// calculated to a given [`ConfidenceLevel`]
 mod interval;
@@ -10,7 +19,7 @@ use num_traits::{Float, FromPrimitive, ToPrimitive};
 use std::fmt;
 
 /// The degree of confidence associated with a value to be computed.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct ConfidenceLevel<T>(pub(crate) T);
 
 impl<T: ToPrimitive> fmt::Display for ConfidenceLevel<T> {

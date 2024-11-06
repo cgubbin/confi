@@ -4,6 +4,16 @@
 //! In a measurement model the null hypothesis under test is typically whether a given reading is
 //! indistinguishable from another, or whether it is indistinguishable from the system response at
 //! zero stimulus (the minimum detectable value).
+//!
+//! ```rust
+//! use confidence::SignificanceLevel;
+//!
+//! let from_fraction = SignificanceLevel::fractional(0.1).unwrap();
+//! let from_percentage = SignificanceLevel::percentage(10.0).unwrap();
+//!
+//! assert_eq!(from_fraction, from_percentage);
+//!
+//! ```
 
 use crate::{ConfidenceError, ConfidenceLevel};
 use num_traits::{Float, FromPrimitive, ToPrimitive};
@@ -13,7 +23,7 @@ use statrs::{
 };
 use std::fmt;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 /// The significance level is expressed as a fraction.
 ///
 /// It represents the probability of a type I error, which corresponds to rejection of a null
