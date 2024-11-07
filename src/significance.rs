@@ -110,14 +110,11 @@ impl<T: Float + FromPrimitive + ToPrimitive> SignificanceLevel<T> {
         let distribution = Normal::new(0.0, 1.0)?;
         Ok(T::from_f64(distribution.inverse_cdf(1.0 - self.0.to_f64().unwrap())).unwrap())
     }
+}
 
+impl<T: ToPrimitive> SignificanceLevel<T> {
     pub fn to_f64(self) -> Option<SignificanceLevel<f64>> {
-        // This should be an if-let chain, but until stability this will do
-        if let Some(significance_level) = self.probability().to_f64() {
-            // Ok to unwrap, as the value can only be created using validated methods
-            return Some(SignificanceLevel::fractional(significance_level).unwrap());
-        }
-        None
+        self.0.to_f64().map(|fraction| SignificanceLevel(fraction))
     }
 }
 

@@ -80,7 +80,7 @@ impl<T: Float + FromPrimitive> Confidence<T> for ConfidenceInterval<T> {
 impl<T> ConfidenceInterval<T> {
     pub fn to_f64(self) -> Option<ConfidenceInterval<f64>>
     where
-        T: Float + FromPrimitive + ToPrimitive,
+        T: ToPrimitive,
     {
         // This should be an if-let chain, but until stability this will do
         match (

@@ -90,15 +90,11 @@ impl<T: Float + FromPrimitive + ToPrimitive> ConfidenceLevel<T> {
     pub fn probability(&self) -> T {
         self.0
     }
+}
 
+impl<T: ToPrimitive> ConfidenceLevel<T> {
     pub fn to_f64(self) -> Option<ConfidenceLevel<f64>> {
-        // This should be an if-let chain, but until stability this will do
-        if let Some(confidence_level) = self.probability().to_f64() {
-            // Ok to unwrap as a [`ConfidenceLevel`] can only be created using a validated method,
-            // so the wrapped value has to be in the acceptable range
-            return Some(ConfidenceLevel::fractional(confidence_level).unwrap());
-        }
-        None
+        self.0.to_f64().map(|fraction| ConfidenceLevel(fraction))
     }
 }
 
