@@ -77,6 +77,27 @@ impl<T: Float + FromPrimitive> Confidence<T> for ConfidenceInterval<T> {
     }
 }
 
+impl<T> ConfidenceInterval<T> {
+    pub fn to_f64(self) -> Option<ConfidenceInterval<f64>>
+    where
+        T: Float + FromPrimitive + ToPrimitive,
+    {
+        // This should be an if-let chain, but until stability this will do
+        match (
+            self.range.start().to_f64(),
+            self.range.end().to_f64(),
+            self.confidence_level.to_f64(),
+        ) {
+            (Some(start), Some(end), Some(confidence_level)) => Some(ConfidenceInterval {
+                range: start..=end,
+                // Unwrap is ok, as the value was originally wrapped we don't need to check again
+                confidence_level,
+            }),
+            _ => None,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
