@@ -10,5 +10,5 @@ repository = "https://github.com/cgubbin/confi"
 [dependencies]
 ndarray = "0.16.1"
 num-traits = "0.2.19"
-statrs = "0.17.1"
+statrs = "0.18.0"
 thiserror = "2.0.0"
