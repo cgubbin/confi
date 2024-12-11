@@ -33,6 +33,11 @@ impl<T: ToPrimitive> fmt::Display for ConfidenceLevel<T> {
 }
 
 impl<T: Float + FromPrimitive + ToPrimitive> ConfidenceLevel<T> {
+    /// Returns the wrapped value as a fraction
+    pub fn into_inner(self) -> T {
+        self.0
+    }
+
     /// Create a new confidence value from a fractional level
     ///
     /// # Errors

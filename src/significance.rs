@@ -41,6 +41,11 @@ impl<T: ToPrimitive> fmt::Display for SignificanceLevel<T> {
 }
 
 impl<T: Float + FromPrimitive + ToPrimitive> SignificanceLevel<T> {
+    /// Returns the wrapped value as a fraction
+    pub fn into_inner(self) -> T {
+        self.0
+    }
+
     /// Create a new significance value from a fractional level
     ///
     /// # Errors
