@@ -17,10 +17,7 @@
 
 use crate::{ConfidenceError, ConfidenceLevel};
 use num_traits::{Float, FromPrimitive, ToPrimitive};
-use statrs::{
-    distribution::{ContinuousCDF, Normal},
-    StatsError,
-};
+use statrs::distribution::{ContinuousCDF, Normal, NormalError};
 use std::fmt;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -111,7 +108,7 @@ impl<T: Float + FromPrimitive + ToPrimitive> SignificanceLevel<T> {
     /// level. The inverse CDF gives the value of the measurand which leads to the given
     /// probability. The number of standard deviations is this divided by the standard deviation of
     /// the distribution
-    pub fn num_standard_deviations(&self) -> Result<T, StatsError> {
+    pub fn num_standard_deviations(&self) -> Result<T, NormalError> {
         let distribution = Normal::new(0.0, 1.0)?;
         Ok(T::from_f64(distribution.inverse_cdf(1.0 - self.0.to_f64().unwrap())).unwrap())
     }

@@ -1,6 +1,6 @@
 [package]
 name = "confi"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 license = "MIT"
 authors = ["Christopher Gubbin <chris.gubbin@gmail.com>"]
@@ -10,5 +10,5 @@ repository = "https://github.com/cgubbin/confi"
 [dependencies]
 ndarray = "0.16.1"
 num-traits = "0.2.19"
-statrs = "0.17.1"
+statrs = "0.18"
 thiserror = "2.0.0"
