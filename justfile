@@ -98,9 +98,8 @@ release type:
     just lint
     just readme
     cargo set-version --bump {{type}}
-    VERSION=$(cargo metadata --format-version 1 \
-        | jq -r '.packages[] | select(.name=="confi") | .version')
-    git add Cargo.toml README.md
+    VERSION=$(sed -n 's/^version *= *"\(.*\)"/\1/p' Cargo.toml)
+    git add Cargo.toml README.md Cargo.lock
     git commit -m "chore(release): v$$VERSION"
     git tag "v$$VERSION"
     git push
