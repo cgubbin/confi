@@ -10,7 +10,7 @@ repository = "https://github.com/cgubbin/confi"
 
 [dependencies]
 num-traits = "0.2.19"
-thiserror = "2.0.0"
+thiserror = "2"
 
 [dev-dependencies]
 approx = "0.5.1"
