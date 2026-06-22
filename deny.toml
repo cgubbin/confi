@@ -1,9 +1,5 @@
-[advisories]
-unmaintained = "warn"
-yanked = "deny"
-
 [bans]
 multiple-versions = "warn"
 
 [licenses]
-allow = ["MIT", "Apache-2.0", "BSD-3-Clause", "ISC"]
+allow = ["MIT", "Apache-2.0", "Unicode-DFS-2016"]
