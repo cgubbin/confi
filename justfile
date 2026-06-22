@@ -98,17 +98,4 @@ release type:
     just lint
     just readme
 
-    bash -eu -c '
-cargo set-version --bump {{type}}
-
-VERSION=$(sed -n "s/^version *= *\"\\(.*\\)\"/\\1/p" Cargo.toml)
-
-echo "Releasing version: $VERSION"
-
-git add Cargo.toml README.md Cargo.lock
-git commit -m "chore(release): v$VERSION"
-git tag "v$VERSION"
-git push
-git push --tags
-cargo publish
-    '
+    bash scripts/release.sh {{type}}
