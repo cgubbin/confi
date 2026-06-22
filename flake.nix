@@ -49,11 +49,15 @@
           fenix.packages.${system}.rust-analyzer
 
           cargo-nextest
-          cargo-tarpaulin
+          cargo-edit
+          cargo-llvm-cov
           cargo-readme
+          cargo-release
           release-plz
           cargo-watch
-          bacon
+          git-cliff
+          cargo-deny
+          cargo-semver-checks
           just
 
           pkg-config
