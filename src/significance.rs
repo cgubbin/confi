@@ -8,120 +8,140 @@
 //! ```rust
 //! use confi::SignificanceLevel;
 //!
-//! let from_fraction = SignificanceLevel::fractional(0.1).unwrap();
-//! let from_percentage = SignificanceLevel::percentage(10.0).unwrap();
+//! let from_probability = SignificanceLevel::new(0.1).unwrap();
+//! let from_percent= SignificanceLevel::from_percent(10.0).unwrap();
 //!
-//! assert_eq!(from_fraction, from_percentage);
+//! assert_eq!(from_probability, from_percent);
 //!
 //! ```
 
-use crate::{ConfidenceError, ConfidenceLevel};
+use crate::{ConfidenceLevel, ValidationError, validate_probability};
 use num_traits::{Float, FromPrimitive, ToPrimitive};
-use statrs::distribution::{ContinuousCDF, Normal, NormalError};
 use std::fmt;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
-/// The significance level is expressed as a fraction.
+/// A statistical significance level.
 ///
-/// It represents the probability of a type I error, which corresponds to rejection of a null
-/// hypothesis which is in fact true.
-pub struct SignificanceLevel<T>(pub(crate) T);
+/// Represents a probability in the closed interval `[0, 1]`.
+///
+/// Common values include:
+///
+/// - 0.10 (10%)
+/// - 0.05 (5%)
+/// - 0.01 (1%)
+///
+/// A significance level `α` corresponds to a confidence level
+/// `α = 1 - c`.
+#[repr(transparent)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+pub struct SignificanceLevel<T>(T);
 
 impl<T: ToPrimitive> fmt::Display for SignificanceLevel<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "Significance Level: {:.3}%",
-            self.0.to_f64().unwrap() * 100.0
-        )
+        let percent = self.0.to_f64().ok_or(fmt::Error)? * 100.0;
+
+        match f.precision() {
+            Some(p) => write!(f, "{percent:.p$}%"),
+            None => write!(f, "{percent:.1}%"),
+        }
+    }
+}
+
+macro_rules! impl_significance_constants {
+    ($t:ty) => {
+        impl SignificanceLevel<$t> {
+            pub const SL10: Self = Self(0.10);
+            pub const SL05: Self = Self(0.05);
+            pub const SL025: Self = Self(0.025);
+            pub const SL01: Self = Self(0.01);
+            pub const SL001: Self = Self(0.001);
+        }
+    };
+}
+
+impl_significance_constants!(f32);
+impl_significance_constants!(f64);
+
+impl<T> SignificanceLevel<T> {
+    /// Returns the probability associated with the significance level as a fraction
+    pub fn into_inner(self) -> T {
+        self.0
+    }
+}
+
+impl<T: Float> SignificanceLevel<T> {
+    /// Creates a significance level from a probability.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use confi::SignificanceLevel;
+    ///
+    /// let sl = SignificanceLevel::new(0.05)?;
+    /// assert_eq!(sl.into_inner(), 0.05);
+    /// # Ok::<_, confi::ValidationError>(())
+    /// ```
+    ///
+    /// # Errors
+    /// - If the provided probability is outside [0, 1], or is NaN
+    pub fn new(probability: T) -> Result<Self, ValidationError> {
+        let probability = validate_probability(probability)?;
+        Ok(Self(probability))
     }
 }
 
 impl<T: Float + FromPrimitive + ToPrimitive> SignificanceLevel<T> {
-    /// Returns the wrapped value as a fraction
-    pub fn into_inner(self) -> T {
-        self.0
-    }
-
-    /// Create a new significance value from a fractional level
+    /// Creates a significance level from a percentage.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use confi::SignificanceLevel;
+    ///
+    /// let sl = SignificanceLevel::from_percent(5.0)?;
+    /// assert_eq!(sl.into_inner(), 0.05);
+    /// # Ok::<_, confi::ValidationError>(())
+    /// ```
     ///
     /// # Errors
-    /// - If the provided value is outside [0, 1], or is NaN
-    pub fn fractional(level: T) -> Result<Self, ConfidenceError> {
-        if (level < T::zero()) || (level > T::one()) {
-            return Err(ConfidenceError::Value(level.to_f64()));
-        }
+    /// - If the provided probability is outside [0, 100], or is NaN
+    pub fn from_percent(percentage: T) -> Result<Self, ValidationError> {
+        let level = validate_probability(percentage / T::from_f64(100.0).unwrap())?;
         Ok(Self(level))
     }
 
-    /// Create a new significance value from a percentage level
+    /// Convert to the associated confidence level
     ///
-    /// # Errors
-    /// - If the provided value is outside [0, 100], or is NaN
-    pub fn percentage(level: T) -> Result<Self, ConfidenceError> {
-        let level = level / T::from_f64(100.0).unwrap();
-        if (level < T::zero()) || (level > T::one()) {
-            return Err(ConfidenceError::Value(level.to_f64()));
-        }
-        Ok(Self(level))
-    }
-
-    /// Create a new significance value representing a significance level of 0.1%
-    pub fn zero_point_one_percent() -> Self {
-        Self(T::from_f64(0.001).unwrap())
-    }
-
-    /// Create a new significance value representing a significance level of 0.5%
-    pub fn zero_point_five_percent() -> Self {
-        Self(T::from_f64(0.005).unwrap())
-    }
-
-    /// Create a new significance value representing a significance level of 1.0%
-    pub fn one_percent() -> Self {
-        Self(T::from_f64(0.01).unwrap())
-    }
-
-    /// Create a new significance value representing a significance level of 2.5%
-    pub fn two_point_five_percent() -> Self {
-        Self(T::from_f64(0.025).unwrap())
-    }
-
-    /// Create a new significance value representing a significance level of 5.0%
-    pub fn five_percent() -> Self {
-        Self(T::from_f64(0.05).unwrap())
-    }
-
-    /// Create a new significance value representing a significance level of 10.0%
-    pub fn ten_percent() -> Self {
-        Self(T::from_f64(0.1).unwrap())
-    }
-
-    /// Return the numerical value associated with the significance level
-    pub fn probability(&self) -> T {
-        self.0
-    }
-
-    /// The number of standard deviations from the distribution center represented by the
-    /// significance level.
+    /// As significance levels are checked for validity on creation the conversion is infallible
     ///
-    /// This is found by calculating the inverse cumululative distribution function at the significance
-    /// level. The inverse CDF gives the value of the measurand which leads to the given
-    /// probability. The number of standard deviations is this divided by the standard deviation of
-    /// the distribution
-    pub fn num_standard_deviations(&self) -> Result<T, NormalError> {
-        let distribution = Normal::new(0.0, 1.0)?;
-        Ok(T::from_f64(distribution.inverse_cdf(1.0 - self.0.to_f64().unwrap())).unwrap())
+    /// # Examples
+    ///
+    /// ```
+    /// use confi::SignificanceLevel;
+    ///
+    /// let sl = SignificanceLevel::new(0.05)?;
+    /// let cl = sl.confidence();
+    /// approx::assert_relative_eq!(cl.into_inner(), 0.95);
+    /// # Ok::<_, confi::ValidationError>(())
+    /// ```
+    pub fn confidence(self) -> ConfidenceLevel<T> {
+        ConfidenceLevel::new(T::one() - self.0).unwrap() // As Confidence levels are validated
+        // self.0 is always in [0, 1]
     }
 }
 
 impl<T: ToPrimitive> SignificanceLevel<T> {
     pub fn to_f64(self) -> Option<SignificanceLevel<f64>> {
-        self.0.to_f64().map(|fraction| SignificanceLevel(fraction))
+        self.0.to_f64().map(SignificanceLevel)
+    }
+
+    pub fn to_f32(self) -> Option<SignificanceLevel<f32>> {
+        self.0.to_f32().map(SignificanceLevel)
     }
 }
 
-impl<T: Float> From<ConfidenceLevel<T>> for SignificanceLevel<T> {
-    fn from(confidence_level: ConfidenceLevel<T>) -> Self {
-        Self(T::one() - confidence_level.0)
+impl<T: Float> From<SignificanceLevel<T>> for ConfidenceLevel<T> {
+    fn from(significance_level: SignificanceLevel<T>) -> Self {
+        ConfidenceLevel::new(T::one() - significance_level.0).unwrap() // Significance levels
+        // cannot be created with probabilities outside [0, 1]
     }
 }

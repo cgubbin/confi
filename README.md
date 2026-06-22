@@ -1,45 +1,106 @@
-# confidence
+# confi
+
+## Confi
+
+`confi` provides lightweight, type-safe primitives for expressing
+statistical confidence levels, significance levels, and confidence intervals.
+
+The crate is designed to make statistical intent explicit in code, without
+pulling in heavy statistical frameworks.
+
+It focuses on **representation and validation**, not on distribution modeling.
+
 ---
 
-A simple crate for dealing with confidence levels, significance levels and confidence intervals.
+### Core types
 
-## Significance Levels
+- [`ConfidenceLevel`] — probability that a procedure correctly captures the true value
+- [`SignificanceLevel`] — probability threshold for hypothesis testing (α)
+- [`ConfidenceInterval`] — bounded estimate with an associated confidence level
+
+All types enforce that probabilities remain in the valid range `[0, 1]`.
+
 ---
-The significance level describes the evidence present in a sample under test which allows for rejection of the null hypothesis (the state when two outcomes or possibilities are the same).
-In a measurement model the null hypothesis under test is typically whether a given reading is indistinguishable from another, or whether it is indistinguishable from the system response at zero stimulus (the minimum detectable value).
+
+### Key concepts
+
+#### Confidence vs significance
+
+Confidence and significance are duals:
+
+```
+confidence = 1 - significance
+```
 
 ```rust
-use confi::SignificanceLevel;
+use confi::{ConfidenceLevel, SignificanceLevel};
 
-let from_fraction = SignificanceLevel::fractional(0.1).unwrap();
-let from_percentage = SignificanceLevel::percentage(10.0).unwrap();
+let c = ConfidenceLevel::from_percent(95.0)?;
+let a: SignificanceLevel<f64> = c.significance();
 
-assert_eq!(from_fraction, from_percentage);
+approx::assert_relative_eq!(a.into_inner(), 0.05);
+```
 
+---
+
+### Confidence intervals
+
+A confidence interval combines:
+
+- a lower bound
+- an upper bound
+- a confidence level
+
+```rust
+use confi::{ConfidenceInterval, ConfidenceLevel};
+
+let level = ConfidenceLevel::from_percent(95.0)?;
+let ci = ConfidenceInterval::new(1.0, 3.0, level)?;
+
+assert!(ci.contains(2.0));
+```
+
+Intervals are closed: `lower ≤ x ≤ upper`.
+
+---
+
+### Features
+
+#### Safe probability types
+All probability-like values are validated to ensure:
+
+- `0 ≤ p ≤ 1`
+- no NaN values
+- finite values only
+
+---
+
+### Design philosophy
+
+This crate is intentionally minimal:
+
+- No statistical distributions are included
+- No hypothesis testing logic is implemented
+- No external statistical dependencies are required
+
+It is intended as a **building block library** for statistical systems,
+not a full statistics toolkit.
+
+---
+
+### Example
+
+```rust
+use confi::{ConfidenceLevel, ConfidenceInterval, SignificanceLevel};
+
+let confidence = ConfidenceLevel::from_percent(95.0)?;
+let alpha: SignificanceLevel<f64> = confidence.into();
+
+let ci = ConfidenceInterval::new(0.0, 1.0, confidence)?;
+
+assert!(ci.contains(0.5));
+approx::assert_relative_eq!(alpha.into_inner(), 0.05);
 ```
 
 
-## Confidence Levels
----
-The confidence level describes the probability of obtaining the same result in repeated data collection processes.
-```rust
-use confi::ConfidenceLevel;
-
-let from_fraction = ConfidenceLevel::fractional(0.1).unwrap();
-let from_percentage = ConfidenceLevel::percentage(10.0).unwrap();
-
-assert_eq!(from_fraction, from_percentage);
-```
-
-## Confidence intervals
----
-A confidence interval is a range of results which can be deemed to contain a measured value to a given confidence level.
-```rust
-use confi::{ConfidenceLevel, ConfidenceInterval, Confidence};
-
-let from_fraction = ConfidenceLevel::fractional(0.1).unwrap();
-let interval = ConfidenceInterval::new(1.0..=3.0, from_fraction);
-
-assert!(interval.contains(2.0));
-
-```
+License: MIT
