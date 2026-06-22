@@ -98,4 +98,4 @@ release type:
     just lint
     just readme
 
-    bash scripts/release.sh {{type}}
+    bash .scripts/release.sh {{type}}
