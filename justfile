@@ -99,16 +99,16 @@ release type:
     just readme
 
     bash -eu -c '
-        cargo set-version --bump {{type}}
+cargo set-version --bump {{type}}
 
-        VERSION=$(sed -n "s/^version *= *\"\\(.*\\)\"/\\1/p" Cargo.toml)
+VERSION=$(sed -n "s/^version *= *\"\\(.*\\)\"/\\1/p" Cargo.toml)
 
-        echo "Releasing version: $VERSION"
+echo "Releasing version: $VERSION"
 
-        git add Cargo.toml README.md Cargo.lock
-        git commit -m "chore(release): v$VERSION"
-        git tag "v$VERSION"
-        git push
-        git push --tags
-        cargo publish
+git add Cargo.toml README.md Cargo.lock
+git commit -m "chore(release): v$VERSION"
+git tag "v$VERSION"
+git push
+git push --tags
+cargo publish
     '
