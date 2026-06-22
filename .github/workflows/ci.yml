@@ -67,7 +67,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Build docs
-        run: cargo doc --all-features --no-deps -- -D warnings
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --all-features --no-deps
 
   readme:
     runs-on: ubuntu-latest
